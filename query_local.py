@@ -1,6 +1,7 @@
 """
 Local query tool for PageIndex JSON results.
-Extracts summaries from the parsed structure and synthesizes answers via OpenAI.
+Extracts summaries from the parsed structure and synthesizes answers via LLM.
+Supports both OpenAI and Google Gemini (auto-detected from .env).
 """
 
 import json
@@ -11,7 +12,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+
+gemini_key = os.getenv("GEMINI_API_KEY")
+if gemini_key:
+    client = OpenAI(api_key=gemini_key, base_url=GEMINI_BASE_URL)
+    DEFAULT_MODEL = "gemini-2.0-flash"
+else:
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    DEFAULT_MODEL = "gpt-4o"
 
 # Sections to skip when building context (saves tokens, reduces noise)
 SKIP_SECTIONS = {"Endnotes", "Bibliography", "Acknowledgments"}
@@ -57,7 +66,7 @@ def should_skip_section(title: str) -> bool:
     return title in SKIP_SECTIONS
 
 
-def query_document(json_path: str, question: str, model: str = "gpt-4o") -> str:
+def query_document(json_path: str, question: str, model: str = DEFAULT_MODEL) -> str:
     """Query a PageIndex JSON structure with a natural language question."""
     doc = load_structure(json_path)
     doc_name = doc.get("doc_name", "Unknown document")
