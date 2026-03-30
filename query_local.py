@@ -17,7 +17,7 @@ GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 gemini_key = os.getenv("GEMINI_API_KEY")
 if gemini_key:
     client = OpenAI(api_key=gemini_key, base_url=GEMINI_BASE_URL)
-    DEFAULT_MODEL = "gemini-2.0-flash"
+    DEFAULT_MODEL = "gemini-2.5-flash"
 else:
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     DEFAULT_MODEL = "gpt-4o"
